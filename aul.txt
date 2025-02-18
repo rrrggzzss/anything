@@ -1,62 +1,43 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../api/auth"; 
 import { Container, TextField, Button, Typography, Box } from "@mui/material";
+import { login } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 
-export default function Register() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+export default function Login() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setEror] = useState("");
+    const { login: setAuthUser } = useAuth();
+    const navigate = useNavigate();
 
-  const handleRegister = async () => {
-    setError(""); 
+    const handleLogin = async () => {
+        try {
+            const userData = await login(username, password);
+            setAuthUser(userData)
+            navigate("/tasks");
+        } catch {
+            setEror("Username atau password salah!");
+        }
+    };
 
-    if (!username || !email || !name || !password || !confirmPassword) {
-      setError("Semua kolom harus diisi.");
-      return;
-    }
+    return (
+        <Container maxWidth="xs">
+            <Box textAlign="center" mt={10}>
+                <Typography variant="h5">Sign In</Typography>
+            </Box>
 
-    if (password.length < 8) {
-      setError("Password minimal 8 karakter.");
-      return;
-    }
+            {error && <Typography color="error">{error}</Typography>}
 
-    if (password !== confirmPassword) {
-      setError("Konfirmasi password tidak cocok.");
-      return;
-    }
+            <TextField label="Username" fullWidth margin="normal" onChange={(e) => setUsername(e.target.value)} />
+            <TextField label="Password" type="password" fullWidth margin="normal" onChange={(e) => setPassword(e.target.value)} />
 
-    try {
-      await register({ username, email, name, password });
-      navigate("/login"); 
-    } catch {
-      setError("Registrasi gagal, coba username lain.");
-    }
-  };
+            <Button variant="contained" fullWidth onClick={handleLogin} sx={{ mt: 2 }}>Sign In</Button>
 
-  return (
-    <Container maxWidth="xs">
-      <Box textAlign="center" mt={10}>
-        <Typography variant="h5">Sign Up</Typography>
-      </Box>
+            <Typography variant="body2" sx={{ mt: 2, textAlign: "center" }}>
+                Belum punya akun? <a href="/register">Sign Up</a>
+            </Typography>
 
-      {error && <Typography color="error" sx={{ textAlign: "center", mt: 2 }}>{error}</Typography>}
-
-      <TextField label="Username" fullWidth margin="normal" onChange={(e) => setUsername(e.target.value)} />
-      <TextField label="Email" type="email" fullWidth margin="normal" onChange={(e) => setEmail(e.target.value)} />
-      <TextField label="Nama" fullWidth margin="normal" onChange={(e) => setName(e.target.value)} />
-      <TextField label="Password" type="password" fullWidth margin="normal" onChange={(e) => setPassword(e.target.value)} />
-      <TextField label="Konfirmasi Password" type="password" fullWidth margin="normal" onChange={(e) => setConfirmPassword(e.target.value)} />
-
-      <Button variant="contained" fullWidth onClick={handleRegister} sx={{ mt: 2 }}>Sign Up</Button>
-
-      <Typography variant="body2" sx={{ mt: 2, textAlign: "center" }}>
-        Sudah punya akun? <a href="/login">Sign In</a>
-      </Typography>
-    </Container>
-  );
+        </Container>
+    )
 }
