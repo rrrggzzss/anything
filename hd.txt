@@ -217,3 +217,50 @@ export default function AllTasksUI() {
     </>
   );
 }
+
+
+/////////////////////////////////////////
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
+const handlePrintReport = () => {
+  const doc = new jsPDF();
+  
+  doc.text("Task Report", 14, 10);
+  
+  const tableColumn = ["No", "Date", "Task", "Category", "Status"];
+  const tableRows = [];
+
+  filteredTasks.forEach((task, index) => {
+    const taskData = [
+      index + 1,
+      new Date(task.date).toLocaleDateString(),
+      task.task,
+      categories[task.categoryId] || "Unknown",
+      task.status === "COMPLETE" ? "Completed" : "Pending",
+    ];
+    tableRows.push(taskData);
+  });
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+   theme: 'grid',
+    startY: 20,
+  });
+
+  doc.save("Task_Report.pdf");
+};
+
+// Tambahkan tombol di dalam bagian filter
+<Button
+  variant="contained"
+  onClick={handlePrintReport}
+  sx={{ backgroundColor: teal[500], color: "white", "&:hover": { backgroundColor: teal[700] } }}
+>
+  Print Report
+</Button>
+
+
+
+
